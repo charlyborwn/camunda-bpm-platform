@@ -13,6 +13,7 @@
 package org.camunda.bpm.engine.impl.persistence.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +40,8 @@ public class UserEntity implements User, Serializable, DbEntity, HasDbRevision {
   protected String password;
   protected String newPassword;
   protected String salt;
+  protected Date lockExpirationTime;
+  protected int attempts;
 
   public UserEntity() {
   }
@@ -54,6 +57,8 @@ public class UserEntity implements User, Serializable, DbEntity, HasDbRevision {
     persistentState.put("email", email);
     persistentState.put("password", password);
     persistentState.put("salt", salt);
+    persistentState.put("lockExpirationTime", lockExpirationTime);
+    persistentState.put("attempts", attempts);
     return persistentState;
   }
 
@@ -113,6 +118,22 @@ public class UserEntity implements User, Serializable, DbEntity, HasDbRevision {
     this.revision = revision;
   }
 
+  public Date getLockExpirationTime() {
+    return lockExpirationTime;
+  }
+
+  public void setLockExpirationTime(Date lockExpirationTime) {
+    this.lockExpirationTime = lockExpirationTime;
+  }
+
+  public int getAttempts() {
+    return attempts;
+  }
+
+  public void setAttempts(int attempts) {
+    this.attempts = attempts;
+  }
+
   public void encryptPassword() {
     if (newPassword != null) {
       salt = generateSalt();
@@ -146,6 +167,8 @@ public class UserEntity implements User, Serializable, DbEntity, HasDbRevision {
            + ", email=" + email
            + ", password=" + password
            + ", salt=" + salt
+           + ", lockExpirationTime=" + lockExpirationTime
+           + ", attempts=" + attempts
            + "]";
   }
 

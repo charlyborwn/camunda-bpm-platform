@@ -17,6 +17,8 @@ import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.time.DateUtils;
+import org.camunda.bpm.engine.AuthorizationException;
 import org.camunda.bpm.engine.authorization.Permissions;
 import org.camunda.bpm.engine.authorization.Resources;
 import org.camunda.bpm.engine.identity.Group;
@@ -29,6 +31,7 @@ import org.camunda.bpm.engine.impl.persistence.entity.MembershipEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.TenantEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.TenantMembershipEntity;
 import org.camunda.bpm.engine.impl.persistence.entity.UserEntity;
+import org.camunda.bpm.engine.impl.util.ClockUtil;
 
 /**
  * <p>{@link WritableIdentityProvider} implementation backed by a
@@ -73,6 +76,34 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
 
       deleteAuthorizations(Resources.USER, userId);
       getDbEntityManager().delete(user);
+    }
+  }
+
+  public boolean checkPassword(String userId, String password) {
+    UserEntity user = findUserById(userId);
+    if ((user == null) || (password == null)) {
+      return false;
+    }
+
+    int attempts = user.getAttempts();
+    if (attempts < 10) {
+      if (user.getLockExpirationTime() != null && user.getLockExpirationTime().after(ClockUtil.getCurrentTime())) {
+//        if (user.getLockExpirationTime() != null) {
+//          throw new ProcessEngineException("not able to login");
+//        }
+        return false;
+      } else {
+        if (matchPassword(password, user)) {
+          return true;
+        } else {
+          user.setAttempts(++attempts);
+          user.setLockExpirationTime(DateUtils.addSeconds(ClockUtil.getCurrentTime(), attempts*2));
+          saveUser(user);
+          return false;
+        }
+      }
+    } else {
+      throw new AuthorizationException("not able to login, ask administrator");
     }
   }
 

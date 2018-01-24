@@ -28,7 +28,9 @@
       LAST_ = #{lastName ,jdbcType=VARCHAR},
       EMAIL_ = #{email ,jdbcType=VARCHAR},
       PWD_ = #{password ,jdbcType=VARCHAR},
-      SALT_ = #{salt ,jdbcType=VARCHAR}
+      SALT_ = #{salt ,jdbcType=VARCHAR},
+      LOCK_EXPR_ = #{lockExpirationTime ,jdbcType=TIMESTAMP},
+      ATTEMPTS_ = #{attempts ,jdbcType=INTEGER}
     where ID_ = #{id}
       and REV_ = #{revision}
   </update>
@@ -49,6 +51,8 @@
     <result property="email" column="EMAIL_" jdbcType="VARCHAR" />
     <result property="dbPassword" column="PWD_" jdbcType="VARCHAR" />
     <result property="salt" column="SALT_" jdbcType="VARCHAR" />
+    <result property="lockExpirationTime" column="LOCK_EXPR_" jdbcType="TIMESTAMP" />
+    <result property="attempts" column="ATTEMPTS_" jdbcType="INTEGER" />
   </resultMap>
   
   <!-- USER SELECT -->
