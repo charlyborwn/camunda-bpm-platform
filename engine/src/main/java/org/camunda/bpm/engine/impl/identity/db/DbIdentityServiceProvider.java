@@ -98,7 +98,11 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
         } else {
           user.setAttempts(++attempts);
 
-          user.setLockExpirationTime(new Date(ClockUtil.getCurrentTime().getTime() + attempts * 2 * 1000));
+          int delay = attempts * 2 * 1000;
+          if (delay > 5 * 60 * 1000) {
+            delay = 5 * 60 * 1000;
+          }
+          user.setLockExpirationTime(new Date(ClockUtil.getCurrentTime().getTime() + delay));
           saveUser(user);
           return false;
         }

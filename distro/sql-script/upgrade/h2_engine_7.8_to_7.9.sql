@@ -1,5 +1,7 @@
 -- CAM-8442
 
 ALTER TABLE ACT_ID_USER
-  ADD LOCK_EXPR timestamp,
-      ATTEMPTS integer;
+  ADD LOCK_EXPR timestamp;
+
+ALTER TABLE ACT_ID_USER
+  ADD ATTEMPTS integer;
