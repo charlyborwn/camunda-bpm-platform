@@ -18,7 +18,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.camunda.bpm.engine.AuthorizationException;
+import org.camunda.bpm.engine.AuthenticationException;
 import org.camunda.bpm.engine.authorization.Permissions;
 import org.camunda.bpm.engine.authorization.Resources;
 import org.camunda.bpm.engine.identity.Group;
@@ -90,7 +90,7 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
     if (attempts < maxAttempts) {
       if (user.getLockExpirationTime() != null && user.getLockExpirationTime().after(ClockUtil.getCurrentTime())) {
         if (user.getLockExpirationTime() != null) {
-          throw new AuthorizationException("not able to login");
+          throw new AuthenticationException(userId);
         }
         return false;
       } else {
@@ -112,7 +112,7 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
         }
       }
     } else {
-      throw new AuthorizationException("not able to login, ask administrator");
+      throw new AuthenticationException(userId, "Contact your administrator.");
     }
   }
 

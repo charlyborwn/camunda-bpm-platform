@@ -719,6 +719,12 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
 
   protected String failedJobRetryTimeCycle;
 
+  // login attempts ///////////////////////////////////////////////////////
+  protected int loginMaxAttempts;
+  protected int loginDelayFactor;
+  protected int loginDelayMaxTime;
+  protected int loginInitialDelay;
+
   // buildProcessEngine ///////////////////////////////////////////////////////
 
   @Override

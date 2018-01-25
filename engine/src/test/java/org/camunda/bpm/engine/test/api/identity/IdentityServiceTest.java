@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.time.DateUtils;
-import org.camunda.bpm.engine.AuthorizationException;
+import org.camunda.bpm.engine.AuthenticationException;
 import org.camunda.bpm.engine.IdentityService;
 import org.camunda.bpm.engine.OptimisticLockingException;
 import org.camunda.bpm.engine.ProcessEngineException;
@@ -629,8 +629,8 @@ public class IdentityServiceTest {
     user.setPassword("xxx");
     identityService.saveUser(user);
 
-    thrown.expect(AuthorizationException.class);
-    thrown.expectMessage("not able to login, ask administrator");
+    thrown.expect(AuthenticationException.class);
+    thrown.expectMessage("The user with id 'johndoe' tries to login without success.");
 
     Date now = sdf.parse("2000-01-24T13:00:00");
     ClockUtil.setCurrentTime(now);
@@ -668,8 +668,8 @@ public class IdentityServiceTest {
     try{
     assertFalse(identityService.checkPassword("johndoe", "xxx"));
     fail("expected exception");
-    } catch (AuthorizationException e) {
-      assertEquals("not able to login", e.getMessage());
+    } catch (AuthenticationException e) {
+      assertEquals("The user with id 'johndoe' tries to login without success.", e.getMessage());
     }
     ClockUtil.setCurrentTime(DateUtils.addSeconds(now, 10));
     assertTrue(identityService.checkPassword("johndoe", "xxx"));
@@ -692,8 +692,8 @@ public class IdentityServiceTest {
     try {
       assertFalse(identityService.checkPassword("johndoe", "invalid pwd"));
       fail("expected exception");
-    } catch (AuthorizationException e) {
-      assertEquals("not able to login", e.getMessage());
+    } catch (AuthenticationException e) {
+      assertEquals("The user with id 'johndoe' tries to login without success.", e.getMessage());
     }
 
     identityService.deleteUser("johndoe");
