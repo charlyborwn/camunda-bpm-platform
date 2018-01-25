@@ -14,10 +14,10 @@ package org.camunda.bpm.engine.impl.identity.db;
 
 import static org.camunda.bpm.engine.impl.util.EnsureUtil.ensureNotNull;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.camunda.bpm.engine.AuthorizationException;
 import org.camunda.bpm.engine.authorization.Permissions;
 import org.camunda.bpm.engine.authorization.Resources;
@@ -97,7 +97,8 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
           return true;
         } else {
           user.setAttempts(++attempts);
-          user.setLockExpirationTime(DateUtils.addSeconds(ClockUtil.getCurrentTime(), attempts*2));
+
+          user.setLockExpirationTime(new Date(ClockUtil.getCurrentTime().getTime() + attempts * 2 * 1000));
           saveUser(user);
           return false;
         }
