@@ -18,6 +18,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -635,7 +636,7 @@ public class IdentityServiceTest {
     ClockUtil.setCurrentTime(now);
     for (int i = 0; i <= 11; i++) {
       assertFalse(identityService.checkPassword("johndoe", "invalid pwd"));
-      now = DateUtils.addSeconds(now, 15);
+      now = DateUtils.addMinutes(now, 2);
       ClockUtil.setCurrentTime(now);
     }
   }
@@ -664,7 +665,12 @@ public class IdentityServiceTest {
     Date now = null;
     now = ClockUtil.getCurrentTime();
     assertFalse(identityService.checkPassword("johndoe", "invalid pwd"));
+    try{
     assertFalse(identityService.checkPassword("johndoe", "xxx"));
+    fail("expected exception");
+    } catch (AuthorizationException e) {
+      assertEquals("not able to login", e.getMessage());
+    }
     ClockUtil.setCurrentTime(DateUtils.addSeconds(now, 10));
     assertTrue(identityService.checkPassword("johndoe", "xxx"));
 
@@ -683,7 +689,12 @@ public class IdentityServiceTest {
 
     // try again before exprTime
     ClockUtil.setCurrentTime(DateUtils.addSeconds(now, 1));
-    assertFalse(identityService.checkPassword("johndoe", "invalid pwd"));
+    try {
+      assertFalse(identityService.checkPassword("johndoe", "invalid pwd"));
+      fail("expected exception");
+    } catch (AuthorizationException e) {
+      assertEquals("not able to login", e.getMessage());
+    }
 
     identityService.deleteUser("johndoe");
   }
