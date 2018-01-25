@@ -2,4 +2,4 @@
 
 ALTER TABLE ACT_ID_USER
   ADD LOCK_EXPR timestamp,
-  ADD ATTEMPTS integer;
+      ATTEMPTS integer;
