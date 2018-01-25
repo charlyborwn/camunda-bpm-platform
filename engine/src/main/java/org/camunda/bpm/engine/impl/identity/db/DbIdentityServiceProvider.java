@@ -86,11 +86,12 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
     }
 
     int attempts = user.getAttempts();
-    if (attempts < 10) {
+    int maxAttempts = 10;
+    if (attempts < maxAttempts) {
       if (user.getLockExpirationTime() != null && user.getLockExpirationTime().after(ClockUtil.getCurrentTime())) {
-//        if (user.getLockExpirationTime() != null) {
-//          throw new ProcessEngineException("not able to login");
-//        }
+        if (user.getLockExpirationTime() != null) {
+          throw new AuthorizationException("not able to login");
+        }
         return false;
       } else {
         if (matchPassword(password, user)) {
@@ -98,9 +99,12 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
         } else {
           user.setAttempts(++attempts);
 
-          int delay = attempts * 2 * 1000;
+          int initialDelay = 0;
+          int factor = 2;
+          int maxDelayInSec = 5 * 60 * 1000;
+          int delay = initialDelay + attempts * factor * 1000;
           if (delay > 5 * 60 * 1000) {
-            delay = 5 * 60 * 1000;
+            delay = maxDelayInSec;
           }
           user.setLockExpirationTime(new Date(ClockUtil.getCurrentTime().getTime() + delay));
           saveUser(user);

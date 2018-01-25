@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.camunda.bpm.engine.IdentityService;
+import org.camunda.bpm.engine.OptimisticLockingException;
 import org.camunda.bpm.engine.identity.Group;
 import org.camunda.bpm.engine.identity.GroupQuery;
 import org.camunda.bpm.engine.identity.NativeUserQuery;
@@ -25,6 +26,7 @@ import org.camunda.bpm.engine.identity.TenantQuery;
 import org.camunda.bpm.engine.identity.User;
 import org.camunda.bpm.engine.identity.UserQuery;
 import org.camunda.bpm.engine.impl.cmd.CheckPassword;
+import org.camunda.bpm.engine.impl.cmd.CommandLogger;
 import org.camunda.bpm.engine.impl.cmd.CreateGroupCmd;
 import org.camunda.bpm.engine.impl.cmd.CreateGroupQueryCmd;
 import org.camunda.bpm.engine.impl.cmd.CreateMembershipCmd;
@@ -64,6 +66,7 @@ import org.camunda.bpm.engine.impl.util.EnsureUtil;
  * @author Tom Baeyens
  */
 public class IdentityServiceImpl extends ServiceImpl implements IdentityService {
+  private final static CommandLogger LOG = ProcessEngineLogger.CMD_LOGGER;
 
   /** thread local holding the current authentication */
   private ThreadLocal<Authentication> currentAuthentication = new ThreadLocal<Authentication>();
@@ -126,7 +129,14 @@ public class IdentityServiceImpl extends ServiceImpl implements IdentityService 
   }
 
   public boolean checkPassword(String userId, String password) {
-    return commandExecutor.execute(new CheckPassword(userId, password));
+    boolean isPassword = false;
+    try {
+      isPassword = commandExecutor.execute(new CheckPassword(userId, password));
+    } catch (OptimisticLockingException e) {
+      LOG.debugCaughtOptimisticLockingException(e);
+      // TODO throw new Exception, please try again
+    }
+    return isPassword;
   }
 
   public void deleteUser(String userId) {
