@@ -722,7 +722,7 @@ public abstract class ProcessEngineConfigurationImpl extends ProcessEngineConfig
   // login attempts ///////////////////////////////////////////////////////
   protected int loginMaxAttempts = 10;
   protected int loginDelayFactor = 2;
-  protected int loginDelayMaxTime = 5 * 60;
+  protected int loginDelayMaxTime = 60;
   protected int loginInitialDelay = 10;
 
   // buildProcessEngine ///////////////////////////////////////////////////////
