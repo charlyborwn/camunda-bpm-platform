@@ -650,7 +650,7 @@ public class IdentityServiceTest {
     Date now = null;
     now = ClockUtil.getCurrentTime();
     assertFalse(identityService.checkPassword("johndoe", "invalid pwd"));
-    ClockUtil.setCurrentTime(DateUtils.addSeconds(now, 10));
+    ClockUtil.setCurrentTime(DateUtils.addSeconds(now, 30));
     assertTrue(identityService.checkPassword("johndoe", "xxx"));
 
     identityService.deleteUser("johndoe");
@@ -670,7 +670,7 @@ public class IdentityServiceTest {
     } catch (AuthenticationException e) {
       assertEquals("The user with id 'johndoe' tries to login without success.", e.getMessage());
     }
-    ClockUtil.setCurrentTime(DateUtils.addSeconds(now, 10));
+    ClockUtil.setCurrentTime(DateUtils.addSeconds(now, 30));
     assertTrue(identityService.checkPassword("johndoe", "xxx"));
 
     identityService.deleteUser("johndoe");

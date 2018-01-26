@@ -51,6 +51,8 @@ public class ConcurrentLoginAttemptTest extends ConcurrencyTestCase {
 
     thread2.makeContinue();
 
+    Thread.sleep(2000);
+
     thread1.waitUntilDone();
 
     thread2.waitForSync();
@@ -62,11 +64,10 @@ public class ConcurrentLoginAttemptTest extends ConcurrencyTestCase {
 
     assertNull(thread1.exception);
     assertNull(thread2.exception);
+//    assertTrue(thread2.exception.getMessage().contains("Please try again"));
   }
 
   protected static class ControllableCheckPasswordCommand extends ControllableCommand<Void> {
-
-    private static final String PASSWORD = "xxx";
 
     public Void execute(CommandContext commandContext) {
 

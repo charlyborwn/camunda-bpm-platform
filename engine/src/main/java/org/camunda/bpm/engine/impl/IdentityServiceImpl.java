@@ -134,7 +134,6 @@ public class IdentityServiceImpl extends ServiceImpl implements IdentityService 
       isPassword = commandExecutor.execute(new CheckPassword(userId, password));
     } catch (OptimisticLockingException e) {
       LOG.debugCaughtOptimisticLockingException(e);
-      // TODO throw new Exception, please try again
     }
     return isPassword;
   }

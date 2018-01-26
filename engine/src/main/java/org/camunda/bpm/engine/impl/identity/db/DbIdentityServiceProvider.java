@@ -86,7 +86,7 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
     }
 
     int attempts = user.getAttempts();
-    int maxAttempts = 10;
+    int maxAttempts = Context.getProcessEngineConfiguration().getLoginMaxAttempts();
     if (attempts < maxAttempts) {
       if (user.getLockExpirationTime() != null && user.getLockExpirationTime().after(ClockUtil.getCurrentTime())) {
         if (user.getLockExpirationTime() != null) {
@@ -99,12 +99,12 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
         } else {
           user.setAttempts(++attempts);
 
-          int initialDelay = 0;
-          int factor = 2;
-          int maxDelayInSec = 5 * 60 * 1000;
-          int delay = initialDelay + attempts * factor * 1000;
-          if (delay > 5 * 60 * 1000) {
-            delay = maxDelayInSec;
+          int initialDelay = Context.getProcessEngineConfiguration().getLoginInitialDelay();
+          int factor = Context.getProcessEngineConfiguration().getLoginDelayFactor();
+          int maxDelayInMs = Context.getProcessEngineConfiguration().getLoginDelayMaxTime() * 1000;
+          int delay = (initialDelay * factor) * 1000;
+          if (delay > maxDelayInMs) {
+            delay = maxDelayInMs;
           }
           user.setLockExpirationTime(new Date(ClockUtil.getCurrentTime().getTime() + delay));
           saveUser(user);
