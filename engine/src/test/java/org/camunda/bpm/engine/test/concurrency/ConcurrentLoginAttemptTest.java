@@ -17,10 +17,7 @@ import org.camunda.bpm.engine.impl.interceptor.CommandContext;
 import org.camunda.bpm.engine.impl.persistence.entity.UserEntity;
 
 /**
- * <p>Tests two simultaneous attempts to login for the same user.</p>
- *
- * <p><b>Note:</b> the test is not executed on H2 because it doesn't support the
- * exclusive lock on table.</p>
+ * <p>Tests two simultaneous attempts to login for the same user which results in OptimisticLockingException.</p>
  *
  */
 public class ConcurrentLoginAttemptTest extends ConcurrencyTestCase {
@@ -43,10 +40,10 @@ public class ConcurrentLoginAttemptTest extends ConcurrencyTestCase {
   }
 
   public void test() throws InterruptedException {
-    ThreadControl thread1 = executeControllableCommand(new ControllableUpdateHistoryLevelCommand());
+    ThreadControl thread1 = executeControllableCommand(new ControllableCheckPasswordCommand());
     thread1.waitForSync();
 
-    ThreadControl thread2 = executeControllableCommand(new ControllableUpdateHistoryLevelCommand());
+    ThreadControl thread2 = executeControllableCommand(new ControllableCheckPasswordCommand());
     thread2.waitForSync();
 
     thread1.makeContinue();
@@ -60,14 +57,14 @@ public class ConcurrentLoginAttemptTest extends ConcurrencyTestCase {
     thread2.waitUntilDone();
 
     UserEntity user = (UserEntity) identityService.createUserQuery().userId(USER_ID).singleResult();
-    System.out.println(user.getAttempts());
-    System.out.println(user.getLockExpirationTime());
+    assertEquals(0, user.getAttempts());
+    assertNull(user.getLockExpirationTime());
 
     assertNull(thread1.exception);
     assertNull(thread2.exception);
   }
 
-  protected static class ControllableUpdateHistoryLevelCommand extends ControllableCommand<Void> {
+  protected static class ControllableCheckPasswordCommand extends ControllableCommand<Void> {
 
     private static final String PASSWORD = "xxx";
 

@@ -662,8 +662,7 @@ public class IdentityServiceTest {
     user.setPassword("xxx");
     identityService.saveUser(user);
 
-    Date now = null;
-    now = ClockUtil.getCurrentTime();
+    Date now = ClockUtil.getCurrentTime();
     assertFalse(identityService.checkPassword("johndoe", "invalid pwd"));
     try{
     assertFalse(identityService.checkPassword("johndoe", "xxx"));
