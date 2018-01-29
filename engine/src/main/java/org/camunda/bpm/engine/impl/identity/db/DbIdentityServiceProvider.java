@@ -24,6 +24,7 @@ import org.camunda.bpm.engine.authorization.Resources;
 import org.camunda.bpm.engine.identity.Group;
 import org.camunda.bpm.engine.identity.Tenant;
 import org.camunda.bpm.engine.identity.User;
+import org.camunda.bpm.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.camunda.bpm.engine.impl.context.Context;
 import org.camunda.bpm.engine.impl.identity.WritableIdentityProvider;
 import org.camunda.bpm.engine.impl.persistence.entity.GroupEntity;
@@ -86,28 +87,26 @@ public class DbIdentityServiceProvider extends DbReadOnlyIdentityServiceProvider
     }
 
     int attempts = user.getAttempts();
-    int maxAttempts = Context.getProcessEngineConfiguration().getLoginMaxAttempts();
+    ProcessEngineConfigurationImpl processEngineConfiguration = Context.getProcessEngineConfiguration();
+    int maxAttempts = processEngineConfiguration.getLoginMaxAttempts();
     if (attempts < maxAttempts) {
       if (user.getLockExpirationTime() != null && user.getLockExpirationTime().after(ClockUtil.getCurrentTime())) {
-        if (user.getLockExpirationTime() != null) {
-          throw new AuthenticationException(userId);
-        }
-        return false;
+        throw new AuthenticationException(userId);
       } else {
         if (matchPassword(password, user)) {
           return true;
         } else {
           user.setAttempts(++attempts);
 
-          int initialDelay = Context.getProcessEngineConfiguration().getLoginInitialDelay();
-          int factor = Context.getProcessEngineConfiguration().getLoginDelayFactor();
-          int maxDelayInMs = Context.getProcessEngineConfiguration().getLoginDelayMaxTime() * 1000;
-          int delay = (initialDelay * factor) * 1000;
+          int maxDelayInMs = processEngineConfiguration.getLoginDelayMaxTime() * 1000;
+          int delay = (processEngineConfiguration.getLoginInitialDelay() * processEngineConfiguration.getLoginDelayFactor()) * 1000;
           if (delay > maxDelayInMs) {
             delay = maxDelayInMs;
           }
           user.setLockExpirationTime(new Date(ClockUtil.getCurrentTime().getTime() + delay));
+
           saveUser(user);
+
           return false;
         }
       }
